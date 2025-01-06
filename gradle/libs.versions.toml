@@ -10,6 +10,8 @@ material = "1.12.0"
 activity = "1.9.3"
 constraintlayout = "2.2.0"
 preference = "1.2.1"
+osmdroid = "6.1.18"
+osmbonuspack = "6.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -20,7 +22,9 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
-androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference"}
+androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
+osmdroid= { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
+osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
