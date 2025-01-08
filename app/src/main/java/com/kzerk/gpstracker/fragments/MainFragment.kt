@@ -1,7 +1,10 @@
 package com.kzerk.gpstracker.fragments
 
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
@@ -14,9 +17,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.MutableLiveData
+import androidx.fragment.app.activityViewModels
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.kzerk.gpstracker.MainViewModel
 import com.kzerk.gpstracker.R
 import com.kzerk.gpstracker.databinding.FragmentMainBinding
+import com.kzerk.gpstracker.location.LocationModel
 import com.kzerk.gpstracker.location.LocationService
 import com.kzerk.gpstracker.utils.DialogManager
 import com.kzerk.gpstracker.utils.TimeUtils
@@ -33,7 +39,8 @@ class MainFragment : Fragment() {
 	private var isServiceRun = false
 	private var timer: Timer? = null
 	private var startTime = 0L
-	private val timeData = MutableLiveData<String>()
+
+	private val model : MainViewModel by activityViewModels()
 	private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 	private lateinit var binding: FragmentMainBinding
 
@@ -52,6 +59,8 @@ class MainFragment : Fragment() {
 		setOnClicks()
 		checkService()
 		updateTime()
+		registerLogReceiver()
+		locationUpdates()
 	}
 
 	override fun onResume() {
@@ -73,11 +82,23 @@ class MainFragment : Fragment() {
 	}
 
 	private fun updateTime() {
-		timeData.observe(viewLifecycleOwner) {
+		model.timeData.observe(viewLifecycleOwner) {
 			binding.tvTime.text = it
 		}
 	}
 
+
+	@SuppressLint("DefaultLocale")
+	private fun locationUpdates() =  with(binding) {
+		model.locationUpdates.observe(viewLifecycleOwner) {
+			val distance = "Distance: ${String.format("%.1f", it.distance)} m"
+			val speed = "Velocity: ${String.format("%.1f", 3.6f * it.velocity)} km/h"
+			val aSpeed = "Average Velocity ${getAverageSpeed(it.distance)}"
+			tvDistance.text = distance
+			tvVelocity.text = speed
+			tvAvgVelocity.text = aSpeed
+		}
+	}
 
 	private fun startTimer() {
 		timer?.cancel()
@@ -86,10 +107,14 @@ class MainFragment : Fragment() {
 		timer?.schedule(object : TimerTask() {
 			override fun run() {
 				activity?.runOnUiThread {
-					timeData.value = getCurrentTime()
+					model.timeData.value = getCurrentTime()
 				}
 			}
 		}, 1000, 1000)
+	}
+
+	private fun getAverageSpeed(distance: Float) : String {
+		return String.format("%1.f", 3.6f * (distance / ((System.currentTimeMillis() - startTime) / 1000.0f)))
 	}
 
 	private fun getCurrentTime(): String {
@@ -209,6 +234,26 @@ class MainFragment : Fragment() {
 				}
 			)
 		}
+	}
+
+	private val receiver = object : BroadcastReceiver() {
+		override fun onReceive(context: Context?, i: Intent?) {
+			if (i?.action == LocationService.LOC_MODEL_INTENT) {
+				val locModel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+					i.getSerializableExtra(LocationService.LOC_MODEL_INTENT, LocationModel::class.java)
+				} else {
+					@Suppress("DEPRECATION")
+					i.getSerializableExtra(LocationService.LOC_MODEL_INTENT) as LocationModel
+				}
+				model.locationUpdates.value = locModel
+			}
+		}
+	}
+
+	private fun registerLogReceiver() {
+		val locFilter = IntentFilter(LocationService.LOC_MODEL_INTENT)
+		LocalBroadcastManager.getInstance(activity as AppCompatActivity)
+			.registerReceiver(receiver, locFilter)
 	}
 
 	companion object {

@@ -57,7 +57,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tvAvgVelovity"
+        android:id="@+id/tv_avg_velocity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
@@ -79,8 +79,8 @@
         android:paddingEnd="5dp"
         android:text="Velocity: 3.5 km/h"
         android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="@+id/tvAvgVelovity"
-        app:layout_constraintTop_toBottomOf="@+id/tvAvgVelovity" />
+        app:layout_constraintStart_toStartOf="@+id/tv_avg_velocity"
+        app:layout_constraintTop_toBottomOf="@+id/tv_avg_velocity" />
 
     <TextView
         android:id="@+id/tvDistance"
