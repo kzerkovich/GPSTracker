@@ -14,7 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.kzerk.gpstracker.R
 import com.kzerk.gpstracker.databinding.FragmentMainBinding
+import com.kzerk.gpstracker.location.LocationService
 import com.kzerk.gpstracker.utils.DialogManager
 import com.kzerk.gpstracker.utils.checkPermission
 import com.kzerk.gpstracker.utils.showToast
@@ -24,7 +26,8 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class MainFragment : Fragment() {
-	private lateinit var pLaucnher: ActivityResultLauncher<Array<String>>
+	private var isServiceRun = false
+	private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 	private lateinit var binding: FragmentMainBinding
 
 	override fun onCreateView(
@@ -39,11 +42,55 @@ class MainFragment : Fragment() {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		registerPermission()
+		setOnClicks()
+		checkService()
 	}
 
 	override fun onResume() {
 		super.onResume()
 		checkLocPermission()
+	}
+
+	private fun setOnClicks() = with(binding){
+		val listener = onClicks()
+		fStartStop.setOnClickListener(listener)
+	}
+
+	private fun onClicks(): View.OnClickListener{
+		return View.OnClickListener {
+			when(it.id) {
+				R.id.fStartStop -> startStopService()
+			}
+		}
+	}
+
+	private fun startStopService() {
+		if (!isServiceRun) {
+			startService()
+		}
+		else {
+			activity?.stopService(Intent(activity, LocationService::class.java))
+			binding.fStartStop.setImageResource(R.drawable.ic_play)
+		}
+		isServiceRun = !isServiceRun
+	}
+
+	private fun startService() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			activity?.startForegroundService(Intent(activity, LocationService::class.java))
+		}
+		else {
+			activity?.startService(Intent(activity, LocationService::class.java))
+		}
+		binding.fStartStop.setImageResource(R.drawable.ic_stop)
+	}
+
+	private fun checkService() {
+		isServiceRun = LocationService.isRun
+
+		if (isServiceRun) {
+			binding.fStartStop.setImageResource(R.drawable.ic_stop)
+		}
 	}
 
 	private fun settingsOsm() {
@@ -67,7 +114,7 @@ class MainFragment : Fragment() {
 	}
 
 	private fun registerPermission() {
-		pLaucnher = registerForActivityResult(
+		pLauncher = registerForActivityResult(
 			ActivityResultContracts.RequestMultiplePermissions()
 		) {
 			if (it[android.Manifest.permission.ACCESS_FINE_LOCATION] == true) {
@@ -95,7 +142,7 @@ class MainFragment : Fragment() {
 			initOSM()
 			checkLocationEnabled()
 		} else {
-			pLaucnher.launch(
+			pLauncher.launch(
 				arrayOf(
 					android.Manifest.permission.ACCESS_FINE_LOCATION,
 					android.Manifest.permission.ACCESS_BACKGROUND_LOCATION
@@ -109,7 +156,7 @@ class MainFragment : Fragment() {
 			initOSM()
 			checkLocationEnabled()
 		} else {
-			pLaucnher.launch(
+			pLauncher.launch(
 				arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
 			)
 		}
