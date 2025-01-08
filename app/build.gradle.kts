@@ -54,4 +54,5 @@ dependencies {
 	implementation(libs.androidx.preference.ktx)
 	implementation(libs.osmbonuspack)
 	implementation(libs.osmdroid)
+	implementation(libs.play.service.location)
 }

@@ -12,6 +12,7 @@ constraintlayout = "2.2.0"
 preference = "1.2.1"
 osmdroid = "6.1.18"
 osmbonuspack = "6.9.0"
+playServiceLocation = "21.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -25,6 +26,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
 osmdroid= { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
+play-service-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServiceLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
