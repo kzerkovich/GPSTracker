@@ -13,6 +13,7 @@ import com.kzerk.gpstracker.MainViewModel
 import com.kzerk.gpstracker.databinding.FragmentTracksBinding
 import com.kzerk.gpstracker.db.TrackAdapter
 import com.kzerk.gpstracker.db.TrackItem
+import com.kzerk.gpstracker.utils.openFragment
 
 class TracksFragment : Fragment(), TrackAdapter.Listener {
 	private lateinit var binding: FragmentTracksBinding
@@ -53,7 +54,14 @@ class TracksFragment : Fragment(), TrackAdapter.Listener {
 		fun newInstance() = TracksFragment()
 	}
 
-	override fun onClick(track: TrackItem) {
-		model.deleteTrack(track)
+	override fun onClick(track: TrackItem, type: TrackAdapter.ClickType) {
+		when (type) {
+
+			TrackAdapter.ClickType.DELETE -> model.deleteTrack(track)
+			TrackAdapter.ClickType.OPEN -> {
+				model.currentTrack.value = track
+				openFragment(ViewTrackFragment.newInstance())
+			}
+		}
 	}
 }

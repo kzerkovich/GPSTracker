@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 class MainViewModel(db: MainDB) : ViewModel() {
 	val dao = db.getDao()
 	val locationUpdates = MutableLiveData<LocationModel>()
+	val currentTrack = MutableLiveData<TrackItem>()
 	val timeData = MutableLiveData<String>()
 	val tracks = dao.getAllTracks().asLiveData()
 

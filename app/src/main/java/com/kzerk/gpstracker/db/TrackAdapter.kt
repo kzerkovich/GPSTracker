@@ -15,6 +15,7 @@ class TrackAdapter(private val listener: Listener) : ListAdapter<TrackItem, Trac
 		private var trackTemp: TrackItem? = null
 		init {
 			binding.ibDelete.setOnClickListener(this)
+			binding.item.setOnClickListener(this)
 		}
 
 		fun bind(track: TrackItem) = with(binding) {
@@ -26,9 +27,14 @@ class TrackAdapter(private val listener: Listener) : ListAdapter<TrackItem, Trac
 			tvDistance.text = distance
 		}
 
-		override fun onClick(p0: View?) {
-			trackTemp?.let { listener.onClick(it) }
-		}
+		override fun onClick(view: View) {
+			val type = when (view.id) {
+				R.id.ibDelete -> ClickType.DELETE
+				R.id.item -> ClickType.OPEN
+				else -> ClickType.OPEN
+			}
+			trackTemp?.let { listener.onClick(it, type) }
+			}
 	}
 
 	class Comparator : DiffUtil.ItemCallback<TrackItem>() {
@@ -53,6 +59,11 @@ class TrackAdapter(private val listener: Listener) : ListAdapter<TrackItem, Trac
 	}
 
 	interface Listener {
-		fun onClick(track: TrackItem)
+		fun onClick(track: TrackItem, type: ClickType)
+	}
+
+	enum class ClickType {
+		DELETE,
+		OPEN
 	}
 }
