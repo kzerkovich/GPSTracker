@@ -5,9 +5,9 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
-import android.widget.Toast
 import com.kzerk.gpstracker.R
 import com.kzerk.gpstracker.databinding.SaveDialogBinding
+import com.kzerk.gpstracker.db.TrackItem
 
 object DialogManager {
 	fun showLocationDialog(context: Context, listener: Listener) {
@@ -24,12 +24,18 @@ object DialogManager {
 		dialog.show()
 	}
 
-	fun showSaveDialog(context: Context, listener: Listener) {
+	fun showSaveDialog(context: Context, item: TrackItem?, listener: Listener) {
 		val builder = AlertDialog.Builder(context)
 		val binding = SaveDialogBinding.inflate(LayoutInflater.from(context), null, false)
 		builder.setView(binding.root)
 		val dialog = builder.create()
 		binding.apply {
+			val time = "${item?.time}"
+			val speed = "${item?.speed} km/h"
+			val distance = "${item?.distance} km"
+			tvTimeSave.text = time
+			tvSpeedSave.text = speed
+			tvDistanceSave.text = distance
 			bSave.setOnClickListener {
 				listener.onClick()
 				dialog.dismiss()

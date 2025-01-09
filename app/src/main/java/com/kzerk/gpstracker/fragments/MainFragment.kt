@@ -20,9 +20,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.kzerk.gpstracker.MainApp
 import com.kzerk.gpstracker.MainViewModel
 import com.kzerk.gpstracker.R
 import com.kzerk.gpstracker.databinding.FragmentMainBinding
+import com.kzerk.gpstracker.db.TrackItem
 import com.kzerk.gpstracker.location.LocationModel
 import com.kzerk.gpstracker.location.LocationService
 import com.kzerk.gpstracker.utils.DialogManager
@@ -35,17 +37,21 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.lang.StringBuilder
 import java.util.Timer
 import java.util.TimerTask
 
 class MainFragment : Fragment() {
+	private var locationModel: LocationModel? = null
 	private var pl: Polyline? = null
 	private var isServiceRun = false
 	private var firstStart = true
 	private var timer: Timer? = null
 	private var startTime = 0L
 
-	private val model : MainViewModel by activityViewModels()
+	private val model: MainViewModel by activityViewModels {
+		MainViewModel.ViewModelFactory((requireContext().applicationContext as MainApp).database)
+	}
 	private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 	private lateinit var binding: FragmentMainBinding
 
@@ -66,6 +72,9 @@ class MainFragment : Fragment() {
 		updateTime()
 		registerLogReceiver()
 		locationUpdates()
+		model.tracks.observe(viewLifecycleOwner) {
+
+		}
 	}
 
 	override fun onResume() {
@@ -94,7 +103,7 @@ class MainFragment : Fragment() {
 
 
 	@SuppressLint("DefaultLocale")
-	private fun locationUpdates() =  with(binding) {
+	private fun locationUpdates() = with(binding) {
 		model.locationUpdates.observe(viewLifecycleOwner) {
 			val distance = "Distance: ${String.format("%.1f", it.distance)} m"
 			val speed = "Speed: ${String.format("%.1f", 3.6f * it.velocity)} km/h"
@@ -102,6 +111,7 @@ class MainFragment : Fragment() {
 			tvDistance.text = distance
 			tvVelocity.text = speed
 			tvAvgVelocity.text = aSpeed
+			locationModel = it
 			updatePolyline(it.geoPointsList)
 		}
 	}
@@ -120,12 +130,25 @@ class MainFragment : Fragment() {
 	}
 
 	@SuppressLint("DefaultLocale")
-	private fun getAverageSpeed(distance: Float) : String {
-		return "${String.format("%.1f", 3.6f * (distance / ((System.currentTimeMillis() - startTime) / 1000.0f)))} km/h"
+	private fun getAverageSpeed(distance: Float): String {
+		return "${
+			String.format(
+				"%.1f",
+				3.6f * (distance / ((System.currentTimeMillis() - startTime) / 1000.0f))
+			)
+		} km/h"
 	}
 
 	private fun getCurrentTime(): String {
 		return "Time: ${TimeUtils.getTime(System.currentTimeMillis() - startTime)}"
+	}
+
+	private fun getPointsToString(list: List<GeoPoint>): String {
+		val sb = StringBuilder()
+		list.forEach {
+			sb.append("${it.latitude}, ${it.longitude}/")
+		}
+		return sb.toString()
 	}
 
 	private fun startStopService() {
@@ -135,13 +158,29 @@ class MainFragment : Fragment() {
 			activity?.stopService(Intent(activity, LocationService::class.java))
 			binding.fStartStop.setImageResource(R.drawable.ic_play)
 			timer?.cancel()
-			DialogManager.showSaveDialog(requireContext(), object : DialogManager.Listener {
-				override fun onClick() {
-					showToast("Saved")
-				}
-			})
+			val track = getTrackItem()
+			DialogManager.showSaveDialog(requireContext(),
+				track,
+				object : DialogManager.Listener {
+					override fun onClick() {
+						showToast("Saved")
+						model.insertTrack(track)
+					}
+				})
 		}
 		isServiceRun = !isServiceRun
+	}
+
+	@SuppressLint("DefaultLocale")
+	private fun getTrackItem(): TrackItem {
+		return TrackItem (
+			null,
+			getCurrentTime(),
+			TimeUtils.getDate(),
+			String.format("%.1f", locationModel?.distance?.div(1000.0f) ?: 0),
+			getAverageSpeed(locationModel?.distance ?: 0.0f),
+			getPointsToString(locationModel?.geoPointsList ?: listOf())
+		)
 	}
 
 	private fun startService() {
@@ -255,7 +294,10 @@ class MainFragment : Fragment() {
 		override fun onReceive(context: Context?, i: Intent?) {
 			if (i?.action == LocationService.LOC_MODEL_INTENT) {
 				val locModel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-					i.getSerializableExtra(LocationService.LOC_MODEL_INTENT, LocationModel::class.java)
+					i.getSerializableExtra(
+						LocationService.LOC_MODEL_INTENT,
+						LocationModel::class.java
+					)
 				} else {
 					@Suppress("DEPRECATION")
 					i.getSerializableExtra(LocationService.LOC_MODEL_INTENT) as LocationModel
@@ -285,8 +327,7 @@ class MainFragment : Fragment() {
 		if (list.size > 1 && firstStart) {
 			fillPolyline(list)
 			firstStart = false
-		}
-		else {
+		} else {
 			addPoint(list)
 		}
 	}
