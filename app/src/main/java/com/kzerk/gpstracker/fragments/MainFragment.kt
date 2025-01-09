@@ -97,8 +97,8 @@ class MainFragment : Fragment() {
 	private fun locationUpdates() =  with(binding) {
 		model.locationUpdates.observe(viewLifecycleOwner) {
 			val distance = "Distance: ${String.format("%.1f", it.distance)} m"
-			val speed = "Velocity: ${String.format("%.1f", 3.6f * it.velocity)} km/h"
-			val aSpeed = "Average Velocity: ${getAverageSpeed(it.distance)}"
+			val speed = "Speed: ${String.format("%.1f", 3.6f * it.velocity)} km/h"
+			val aSpeed = "Average Speed: ${getAverageSpeed(it.distance)}"
 			tvDistance.text = distance
 			tvVelocity.text = speed
 			tvAvgVelocity.text = aSpeed
@@ -135,6 +135,11 @@ class MainFragment : Fragment() {
 			activity?.stopService(Intent(activity, LocationService::class.java))
 			binding.fStartStop.setImageResource(R.drawable.ic_play)
 			timer?.cancel()
+			DialogManager.showSaveDialog(requireContext(), object : DialogManager.Listener {
+				override fun onClick() {
+					showToast("Saved")
+				}
+			})
 		}
 		isServiceRun = !isServiceRun
 	}

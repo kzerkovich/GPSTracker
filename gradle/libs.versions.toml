@@ -1,6 +1,6 @@
 [versions]
 agp = "8.7.3"
-kotlin = "1.9.0"
+kotlin = "2.1.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -13,6 +13,11 @@ preference = "1.2.1"
 osmdroid = "6.1.18"
 osmbonuspack = "6.9.0"
 playServiceLocation = "21.3.0"
+room = "2.6.1"
+room-compiler = "2.6.1"
+ksp = "2.1.0-1.0.29"
+livedata = "2.5.1"
+viewmodel = "2.5.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -27,8 +32,13 @@ androidx-preference-ktx = { group = "androidx.preference", name = "preference-kt
 osmdroid= { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
 play-service-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServiceLocation" }
+androidx-room = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room-compiler" }
+lifecycle-livedata = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "livedata" }
+lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "viewmodel"}
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+com-google-devtools-ksp = {id = "com.google.devtools.ksp", version.ref = "ksp"}

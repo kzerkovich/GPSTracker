@@ -1,6 +1,7 @@
 plugins {
 	alias(libs.plugins.android.application)
 	alias(libs.plugins.jetbrains.kotlin.android)
+	alias(libs.plugins.com.google.devtools.ksp)
 }
 
 android {
@@ -55,4 +56,8 @@ dependencies {
 	implementation(libs.osmbonuspack)
 	implementation(libs.osmdroid)
 	implementation(libs.play.service.location)
+	implementation(libs.androidx.room)
+	ksp(libs.room.compiler)
+	implementation(libs.lifecycle.livedata)
+	implementation(libs.lifecycle.viewmodel)
 }

@@ -12,4 +12,10 @@
     <string name="location_dialog_message">Do you want enable GPS?</string>
     <string name="ok">Yes</string>
     <string name="no">No</string>
+    <string name="saveTrack">Save track?</string>
+    <string name="time">Time:</string>
+    <string name="speed">Speed:</string>
+    <string name="distance">Distance:</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
 </resources>
