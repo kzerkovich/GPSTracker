@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
 import com.kzerk.gpstracker.MainApp
 import com.kzerk.gpstracker.MainViewModel
 import com.kzerk.gpstracker.R
@@ -54,6 +55,7 @@ class MainFragment : Fragment() {
 	}
 	private lateinit var pLauncher: ActivityResultLauncher<Array<String>>
 	private lateinit var binding: FragmentMainBinding
+	private lateinit var myLocOverlay: MyLocationNewOverlay
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -82,12 +84,14 @@ class MainFragment : Fragment() {
 	private fun setOnClicks() = with(binding) {
 		val listener = onClicks()
 		fStartStop.setOnClickListener(listener)
+		fCenter.setOnClickListener(listener)
 	}
 
 	private fun onClicks(): View.OnClickListener {
 		return View.OnClickListener {
 			when (it.id) {
 				R.id.fStartStop -> startStopService()
+				R.id.fCenter -> centerLocation()
 			}
 		}
 	}
@@ -96,6 +100,11 @@ class MainFragment : Fragment() {
 		model.timeData.observe(viewLifecycleOwner) {
 			binding.tvTime.text = it
 		}
+	}
+
+	private fun centerLocation() {
+		binding.map.controller.animateTo(myLocOverlay.myLocation)
+		myLocOverlay.enableFollowLocation()
 	}
 
 
@@ -209,10 +218,13 @@ class MainFragment : Fragment() {
 
 	private fun initOSM() = with(binding) {
 		pl = Polyline()
-		pl?.outlinePaint?.color = Color.GREEN
+		pl?.outlinePaint?.color = Color.parseColor(
+			PreferenceManager.getDefaultSharedPreferences(requireContext())
+				.getString("color_key", "#FF000000")
+		)
 		map.controller.setZoom(20.0)
 		val myLocProvider = GpsMyLocationProvider(activity)
-		val myLocOverlay = MyLocationNewOverlay(myLocProvider, map)
+		myLocOverlay = MyLocationNewOverlay(myLocProvider, map)
 		myLocOverlay.enableMyLocation()
 		myLocOverlay.enableFollowLocation()
 		myLocOverlay.runOnFirstFix {
