@@ -18,4 +18,9 @@
     <string name="distance">Distance:</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="distance_on_main_screen">Distance: 0.0 km</string>
+    <string name="speed_on_main_screen">Speed: 0.0 km/h</string>
+    <string name="average_speed_on_main_screen">Average speed: 0.0 km/h</string>
+    <string name="time_on_main_screen">Time: 00:00:00</string>
+    <string name="empty_list">No saved tracks</string>
 </resources>

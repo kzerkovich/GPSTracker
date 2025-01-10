@@ -11,10 +11,10 @@ import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.PreferenceManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -54,14 +54,15 @@ class LocationService : Service() {
 		isRun = false
 	}
 
-	private val locCallback = object: LocationCallback() {
+	private val locCallback = object : LocationCallback() {
 		override fun onLocationResult(lResult: LocationResult) {
 			super.onLocationResult(lResult)
 			val curLocation = lResult.lastLocation
 			if (lastLocation != null && curLocation != null) {
-				if (curLocation.speed > 0.2)
+				if (curLocation.speed > 0.35) {
 					distance += lastLocation?.distanceTo(curLocation)!!
-				geoPointsList.add(GeoPoint(curLocation.latitude, curLocation.longitude))
+					geoPointsList.add(GeoPoint(curLocation.latitude, curLocation.longitude))
+				}
 				val locModel = LocationModel(
 					curLocation.speed,
 					distance,
@@ -108,8 +109,11 @@ class LocationService : Service() {
 	}
 
 	private fun initLocation() {
-		locRequest = LocationRequest.Builder(PRIORITY_HIGH_ACCURACY, 5000)
-			.setMaxUpdateDelayMillis(5000L)
+		val updateInterval = PreferenceManager.getDefaultSharedPreferences(
+			this
+		).getString("update_time_key", "3000")?.toLong() ?: 3000L
+		locRequest = LocationRequest.Builder(PRIORITY_HIGH_ACCURACY, updateInterval)
+			.setMaxUpdateDelayMillis(updateInterval)
 			.build()
 		locProvider = LocationServices.getFusedLocationProviderClient(baseContext)
 	}

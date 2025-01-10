@@ -79,6 +79,7 @@ class MainFragment : Fragment() {
 	override fun onResume() {
 		super.onResume()
 		checkLocPermission()
+		firstStart = true
 	}
 
 	private fun setOnClicks() = with(binding) {
@@ -179,11 +180,11 @@ class MainFragment : Fragment() {
 
 	@SuppressLint("DefaultLocale")
 	private fun getTrackItem(): TrackItem {
-		return TrackItem (
+		return TrackItem(
 			null,
 			getCurrentTime(),
 			TimeUtils.getDate(),
-			String.format("%.1f", locationModel?.distance?.div(1000.0f) ?: 0),
+			String.format("%.1f", locationModel?.distance?.div(1000.0f) ?: 0.0f),
 			getAverageSpeed(locationModel?.distance ?: 0.0f),
 			getPointsToString(locationModel?.geoPointsList ?: listOf())
 		)
@@ -229,8 +230,8 @@ class MainFragment : Fragment() {
 		myLocOverlay.enableFollowLocation()
 		myLocOverlay.runOnFirstFix {
 			map.overlays.clear()
-			map.overlays.add(myLocOverlay)
 			map.overlays.add(pl)
+			map.overlays.add(myLocOverlay)
 		}
 	}
 
@@ -323,7 +324,8 @@ class MainFragment : Fragment() {
 	}
 
 	private fun addPoint(list: List<GeoPoint>) {
-		pl?.addPoint(list[list.size - 1])
+		if (list.isNotEmpty())
+			pl?.addPoint(list[list.size - 1])
 	}
 
 	private fun fillPolyline(list: List<GeoPoint>) {
